@@ -8,11 +8,11 @@ def getPage(title):
     return wikipedia.page(title)
 
 def stripExtraneous(input):
-    to_return =  input.replace('\n','')
-    to_return = to_return.replace('\u','')
-    to_return = to_return.replace('\t','')
+    to_return =  input.replace('\n',' ')
+    to_return = to_return.replace('\u',' ')
+    to_return = to_return.replace('\t',' ')
     for ch in string.punctuation:
-        to_return = to_return.replace(ch,'')
+        to_return = to_return.replace(ch,' ')
     return to_return
 
 def getCleanWikiContent(title):
@@ -157,6 +157,7 @@ def generateSentences(wordList):
 
 # Take in a list of Counter, percentage = r, number of appearance = n
 # Return a list of words that appears strictly more than n time in > r*all articles
+# suitable if only want to know common words
 def getCommonWords(articleCounters, r, n):
     trackExceed = collections.Counter()
     for article in articleCounters:
@@ -168,10 +169,13 @@ def getCommonWords(articleCounters, r, n):
 
 # Take in a list of lists, percentage = r, number of appearance = n
 # Return a list of words that appears strictly more than n time in > r*all articles
+# suitable if only want to know common words
 def getCommonWordsFromList(articleLists, r, n):
     articleCounters = [collections.Counter(l) for l in articleLists]
     return getCommonWords(articleCounters, r, n)
 
+# This removes words appearing in a given list from Counters.
+# suitable if only want to proceed with prior knowledge about common words
 def removeWordsFrom(articleCounters, words):
     if type(articleCounters) == collections.Counter:
         for w in words:
@@ -181,16 +185,37 @@ def removeWordsFrom(articleCounters, words):
             for articles in articleCounters:
                 del articles[w]
 
+# This removes words appearing in a given list. Returns a new list !!!
+# suitable if only want to proceed with prior knowledge about common words
 def removeWordsFromList(articleLists, words):
     articleCounters = [collections.Counter(l) for l in articleLists]
     removeWordsFrom(articleCounters, words)
     return [list(c.elements()) for c in articleCounters]
 
+# Combine All above. Modify counter
 def autoTruncate(articleCounters, r, n):
     wordlist = getCommonWords(articleCounters, r, n)
     removeWordsFrom(articleCounters, wordlist)
 
+# Combine all above. Returns a new list.
 def truncatedList(articleLists, r, n):
     articleCounters = [collections.Counter(l) for l in articleLists]
     autoTruncate(articleCounters, r, n)
     return [list(c.elements()) for c in articleCounters]
+
+# Given a long text, break into sentencess
+def toSentences(s):
+    # \n
+    x1 = s.split('\n')
+    x2 = []
+    x3 = []
+    for tokens in x1:
+        x2 += tokens.split('. ')
+    for tokens in x2:
+        if len(tokens) > 1:
+            x3 += [stripExtraneous(tokens).split()]
+    return x3
+
+# get article as sentences (Fairly clean, but still contains weird characters)
+def getWikiSentences(title):
+    return toSentences(wikipedia.page(title).content.lower())
