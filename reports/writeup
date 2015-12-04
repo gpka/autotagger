@@ -1,0 +1,31 @@
+Semantic Level Relevance Evaluation
+
+Define the input-output behavior of the system and the scope of the project
+>> Input = names of two Wikipedia articles
+>> Output = relevance ranging from 0 to 1 (0 is least relevant, 1 is most relevant)
+In the future, we would like to generalize the model so that it can capture
+the relevance of shorter articles or passages.
+
+Metric for success
+>>
+
+Preliminary data, inputs, outputs
+'Pad Thai', 'Sushi': 0.257
+'Pad Thai', 'Thailand': 0.428
+'Statue of Liberty', 'American Revolution': 0.363
+'Elephant', 'Dog': 0.331
+'Elephant', 'Detergent': 0.139
+'Elephant', 'Cat': 0.389
+'Elephant', 'Car': 0.289
+'Sushi', 'Tempura': 0.421
+'Sushi', 'Hamburger': 0.333
+'Stanford University', 'University': 0.307
+'Stanford University', 'Massachusetts Institute of Technology': 0.307
+'Stanford University', 'Tree': 0.150
+
+Baseline Implementation, Oracle, Gap, Challenge
+>> We implement a baseline algorithm by create a feature vector that contains word counts
+for each article with particles and other unrelated words removed. Then we evaluate the
+relevance of two articles by taking a dot product and normalize it by the norm of two vectors.
+The relevance value therefore will range from 0 to 1.
+The baseline algorithm captures basic 

@@ -1,0 +1,12 @@
+Natural Language Processing
+Relevance
+Auto-Tagging
+Auto-Summarizing
+Naive Bayes
+Semantic Network
+Graph Search
+Language Modeling
+sparsity
+word vectors
+article vectors
+high frequency word filtering
