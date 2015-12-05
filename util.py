@@ -3,6 +3,7 @@ import math
 import gensim as gs
 import wikipedia
 import string
+import random
 
 def getPage(title):
     return wikipedia.page(title)
@@ -25,7 +26,7 @@ def removeMeaningless(text):
     to_remove = {'The', 'the', 'A', 'a', 'is', 'are', 'was', 'were', 'of', 'in',\
      'by', 'for', 'as','at', 'which', 'that', 'to', 'on', 'than', 'into', 'also',\
      'an', 'An', 'For','and','And','with','in', 'from','has','it','In','have', '', 'or', 'be'\
-     ,'there', 'their'}
+     ,'there', 'their', 'between', 'over', 'before', 'after'}
     if type(text) == collections.Counter:
         for word in to_remove:
             text[word] = 0
@@ -34,6 +35,11 @@ def removeMeaningless(text):
         return [word for word in text if word not in to_remove]
     else:
         raise Exception("type error. Expected list or counter")
+
+def freqFilter(wordList, low, high):
+    count =  collections.Counter(wordList)
+    totalCount = sum(count.values())
+    return [word for word in wordList if float(count[word])/totalCount >= low and float(count[word])/totalCount < high]
 
 # This will modify a lexicon to get an effective frequency
 def toEffectiveFrequency(lex, threshold):
@@ -250,3 +256,9 @@ def getWikiCompareSpectrum(title1, title2, smooth=1, returntype=collections.Coun
     for words in result:
         result[words] = 2 * float(result[words] - mini) / (maxi - mini) - 1
     return result
+
+#####################################################################################
+# Given a list of words and a desired length, return a list of which words are resampled according
+# to the original probability distribution.
+def resample(wordList, size):
+    return [random.choice(wordList) for i in range(size)]
