@@ -9,27 +9,30 @@ import numpy as np
 
 model = gs.models.Word2Vec.load('gensimModel')
 
-listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'Japan', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama']
+listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'Japan', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama', 'Google']
 pages = [util.getCleanWikiContent(names) for names in listOfPageName]
 texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.001, 1) for page in pages]
 # texts = [util.removeMeaningless(page.lower().split(' ')) for page in pages]
-# texts = util.truncatedList(texts, 0.4, 0)
-
+print texts
+texts = util.truncatedList(texts, 0.5, 1)
+print texts
 # print truncatedLists[0]
 
 #List of list
-resampledTexts = [util.resample(text, 100) for text in texts]
+resampledTexts = [util.resample(text, 200) for text in texts]
+countTexts = [collections.Counter(text) for text in resampledTexts]
 
 # print collections.Counter(resampledTexts[0])
 
 # text0 = list(set(resampledTexts[2]))
-text0 = resampledTexts[2]
+text0 = resampledTexts[-1]
+countText0 = countTexts[-1]
 text0_invocab = [word for word in text0 if word in model.vocab]
 vecs = [model[word] for word in text0 if word in model.vocab]
 
 #K-means
 
-num_centroids = 15
+num_centroids = 8
 #randomize centroids
 centroids = random.sample(vecs, num_centroids)
 
@@ -76,8 +79,14 @@ for i, word in enumerate(text0_invocab):
     cluster[index].append(word)
 
 for index, centroid in enumerate(cluster):
+    sum = 0
     print "+++++++++ ", index, " ++++++++++"
     for word in centroid:
+        sum += countText0[word]
         print word
+    print sum
 # print text0_invocab
 # print assignments
+
+texts = [page.lower().split(' ') for page in pages]
+print util.getCommonWordsFromList(texts, 0.6, 0)

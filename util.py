@@ -26,7 +26,7 @@ def removeMeaningless(text):
     to_remove = {'The', 'the', 'A', 'a', 'is', 'are', 'was', 'were', 'of', 'in',\
      'by', 'for', 'as','at', 'which', 'that', 'to', 'on', 'than', 'into', 'also',\
      'an', 'An', 'For','and','And','with','in', 'from','has','it','In','have', '', 'or', 'be'\
-     ,'there', 'their', 'between', 'over', 'before', 'after'}
+     ,'there', 'their', 'between', 'over', 'before', 'after', 'some', 'had', 'would', 'will'}
     if type(text) == collections.Counter:
         for word in to_remove:
             text[word] = 0
