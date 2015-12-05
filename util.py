@@ -4,6 +4,7 @@ import gensim as gs
 import wikipedia
 import string
 import random
+import numpy as np
 
 def getPage(title):
     return wikipedia.page(title)
@@ -262,3 +263,81 @@ def getWikiCompareSpectrum(title1, title2, smooth=1, returntype=collections.Coun
 # to the original probability distribution.
 def resample(wordList, size):
     return [random.choice(wordList) for i in range(size)]
+
+#####################################################################################
+
+def k_means(article_name):
+    model = gs.models.Word2Vec.load('gensimModel')
+    page = getCleanWikiContent(article_name)
+    text = freqFilter(removeMeaningless(page.lower().split(' ')), 0.001, 1)
+    resampledText = resample(text, 200)
+    countText = collections.Counter(resampledText)
+    vecs = [model[word] for word in resampledText if word in model.vocab]
+
+    text0 = resampledText
+    countText0 = countText
+    text0_invocab = [word for word in text0 if word in model.vocab]
+
+    #K-means
+    num_iter = 10
+    num_centroids = 8
+    min_cost = float('inf')
+    final_assignments = [-1 for i in range(len(vecs))]
+    for i in range(num_iter):
+
+        #initialize cost of objective Function
+        cost = 0
+
+        #randomize centroids
+        centroids = random.sample(vecs, num_centroids)
+
+        preassignments = [0 for i in range(len(vecs))]
+        assignments = [-1 for i in range(len(vecs))]
+
+        # do until assignments coverge
+        while assignments != preassignments:
+            cost = 0
+            preassignments = assignments
+            cluster = [[]]*num_centroids
+
+            #assigning centroids to each vector
+            for i, vec in enumerate(vecs):
+                norm = float('inf')
+                assign = -1
+                for index, centroid in enumerate(centroids):
+                    value = np.linalg.norm(vec - centroid)
+                    if value < norm:
+                        assign = index
+                        norm = value
+                cost += norm
+                assignments[i] = assign
+                cluster[assign].append(vec)
+
+            # recalculating the centroids
+            mean_centroids = [np.array([0.0 for i in range(100)]) for j in range(num_centroids)]
+            count_centroids = [0 for i in range(num_centroids)]
+            for i in range(len(vecs)):
+                mean_centroids[assignments[i]] += vecs[i]
+                count_centroids[assignments[i]] += 1
+            for i in range(num_centroids):
+                if count_centroids[i] != 0:
+                    mean_centroids[i] = mean_centroids[i]/count_centroids[i]
+            centroids = mean_centroids
+
+        if cost < min_cost:
+            final_assignments = assignments
+            min_cost = cost
+
+    cluster = [[] for i in range(num_centroids)]
+    for i, word in enumerate(text0_invocab):
+        index = final_assignments[i]
+        cluster[index].append(word)
+
+    weights = [0 for i in range(num_centroids)]
+    for index, centroid in enumerate(cluster):
+        s = 0
+        for word in centroid:
+            s += countText0[word]
+        weights[index] = s
+    print type(centroids), type(centroids[0]), type(weights)
+    return(centroids, weights)
