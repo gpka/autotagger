@@ -28,7 +28,7 @@ def removeMeaningless(text):
     to_remove = {'The', 'the', 'A', 'a', 'is', 'are', 'was', 'were', 'of', 'in',\
      'by', 'for', 'as','at', 'which', 'that', 'to', 'on', 'than', 'into', 'also',\
      'an', 'An', 'For','and','And','with','in', 'from','has','it','In','have', '', 'or', 'be'\
-     ,'there', 'their', 'between', 'over', 'before', 'after', 'some', 'had', 'would', 'will'}
+     ,'there', 'their', 'between', 'over', 'before', 'after', 'some', 'had', 'would', 'will', 'its', 's', 'other', 'others'}
     if type(text) == collections.Counter:
         for word in to_remove:
             text[word] = 0
@@ -241,14 +241,14 @@ def resample(wordList, size):
 
 def updatedResample(wordList, size):
     count = collections.Counter(wordList)
-    total = sum(count.value())
+    total = sum(count.values())
     to_return = []
     for word in count:
-        iteration = math.floor(count[word]/float(total)*size)
+        iteration = int(math.floor(count[word]/float(total)*size))
         for i in range(iteration):
             to_return.append(word)
     return to_return
-    
+
 #####################################################################################
 
 def k_means(article_name):
@@ -323,5 +323,9 @@ def k_means(article_name):
         s = 0
         for word in centroid:
             s += countText0[word]
+        if len(centroid) != 0:
+            s = s/float(len(centroid))
         weights[index] = s
-    return(centroids, weights)
+    toReturn_centroids = [centroids[i] for i in range(num_centroids) if weights[i] > 0]
+    toReturn_weights = [weight[i] for i in range(num_centroids) if weights[i] > 0]
+    return(toReturn_centroids, toReturn_weights)
