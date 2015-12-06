@@ -9,9 +9,10 @@ import numpy as np
 
 model = gs.models.Word2Vec.load('gensimModel')
 
-listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'Japan', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama', 'Google']
+listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'Microsoft', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama', 'Google']
 pages = [util.getCleanWikiContent(names) for names in listOfPageName]
-texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.001, 1) for page in pages]
+texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.0025, 1) for page in pages]
+print texts
 # texts = [util.removeMeaningless(page.lower().split(' ')) for page in pages]
 # print texts
 # texts = util.truncatedList(texts, 0.5, 1)
@@ -19,14 +20,14 @@ texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.001,
 # print truncatedLists[0]
 
 #List of list
-resampledTexts = [util.resample(text, 200) for text in texts]
+resampledTexts = [util.resample(text, 60) for text in texts]
 countTexts = [collections.Counter(text) for text in resampledTexts]
 
 # print collections.Counter(resampledTexts[0])
 
 # text0 = list(set(resampledTexts[2]))
-text0 = resampledTexts[-1]
-countText0 = countTexts[-1]
+text0 = resampledTexts[3]
+countText0 = countTexts[3]
 text0_invocab = [word for word in text0 if word in model.vocab]
 vecs = [model[word] for word in text0 if word in model.vocab]
 

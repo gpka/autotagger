@@ -339,5 +339,4 @@ def k_means(article_name):
         for word in centroid:
             s += countText0[word]
         weights[index] = s
-    print type(centroids), type(centroids[0]), type(weights)
     return(centroids, weights)
