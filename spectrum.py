@@ -32,4 +32,4 @@ def getWikiCompareSpectrum(title1, title2, smooth=1, returntype=collections.Coun
     return result
 
 # OddOneOut model
-def oddOneOut(article1, article2, article3):
+# def oddOneOut(article1, article2, article3):

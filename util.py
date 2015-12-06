@@ -43,6 +43,8 @@ def freqFilter(wordList, low, high):
     totalCount = sum(count.values())
     return [word for word in wordList if float(count[word])/totalCount >= low and float(count[word])/totalCount < high]
 
+
+
 # This will modify a lexicon to get an effective frequency
 def toEffectiveFrequency(lex, threshold):
     for words in lex:
@@ -237,13 +239,23 @@ def getWikiSentences(title):
 def resample(wordList, size):
     return [random.choice(wordList) for i in range(size)]
 
+def updatedResample(wordList, size):
+    count = collections.Counter(wordList)
+    total = sum(count.value())
+    to_return = []
+    for word in count:
+        iteration = math.floor(count[word]/float(total)*size)
+        for i in range(iteration):
+            to_return.append(word)
+    return to_return
+    
 #####################################################################################
 
 def k_means(article_name):
     model = gs.models.Word2Vec.load('gensimModel')
     page = getCleanWikiContent(article_name)
-    text = freqFilter(removeMeaningless(page.lower().split(' ')), 0.001, 1)
-    resampledText = resample(text, 200)
+    text = freqFilter(removeMeaningless(page.lower().split(' ')), 0.003, 1)
+    resampledText = resample(text, 60)
     countText = collections.Counter(resampledText)
     vecs = [model[word] for word in resampledText if word in model.vocab]
 
