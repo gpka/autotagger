@@ -9,9 +9,9 @@ import numpy as np
 
 model = gs.models.Word2Vec.load('gensimModel')
 
-listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'Japan', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama', 'Google']
+listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'google', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama', 'Google']
 pages = [util.getCleanWikiContent(names) for names in listOfPageName]
-texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.001, 1) for page in pages]
+texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.002, 1) for page in pages]
 # texts = [util.removeMeaningless(page.lower().split(' ')) for page in pages]
 # print texts
 # texts = util.truncatedList(texts, 0.5, 1)
@@ -19,20 +19,20 @@ texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.001,
 # print truncatedLists[0]
 
 #List of list
-resampledTexts = [util.resample(text, 200) for text in texts]
+resampledTexts = [util.updatedResample(text, 100) for text in texts]
 countTexts = [collections.Counter(text) for text in resampledTexts]
 
 # print collections.Counter(resampledTexts[0])
 
 # text0 = list(set(resampledTexts[2]))
-text0 = resampledTexts[-1]
-countText0 = countTexts[-1]
+text0 = resampledTexts[3]
+countText0 = countTexts[3]
 text0_invocab = [word for word in text0 if word in model.vocab]
 vecs = [model[word] for word in text0 if word in model.vocab]
 
 #K-means
-num_iter = 10
-num_centroids = 8
+num_iter = 50
+num_centroids = 20
 min_cost = float('inf')
 final_assignments = [-1 for i in range(len(vecs))]
 for i in range(num_iter):
@@ -50,7 +50,6 @@ for i in range(num_iter):
     while assignments != preassignments:
         cost = 0
         preassignments = assignments
-        cluster = [[]]*num_centroids
 
         #assigning centroids to each vector
         for i, vec in enumerate(vecs):
@@ -63,7 +62,6 @@ for i in range(num_iter):
                     norm = value
             cost += norm
             assignments[i] = assign
-            cluster[assign].append(vec)
 
         # recalculating the centroids
         mean_centroids = [np.array([0.0 for i in range(100)]) for j in range(num_centroids)]
@@ -81,7 +79,6 @@ for i in range(num_iter):
         min_cost = cost
 
 
-
 cluster = [[] for i in range(num_centroids)]
 for i, word in enumerate(text0_invocab):
     index = final_assignments[i]
@@ -93,8 +90,11 @@ for index, centroid in enumerate(cluster):
     for word in centroid:
         sum += countText0[word]
         print word
+    if len(centroid) != 0:
+        sum = sum/float(len(centroid))
     print sum
 
+# print centroids
 
 # texts = [page.lower().split(' ') for page in pages]
 # print util.getCommonWordsFromList(texts, 0.6, 0)
