@@ -5,6 +5,7 @@ import wikipedia
 import string
 import random
 import numpy as np
+import spectrum
 
 def getPage(title):
     return wikipedia.page(title)
@@ -41,6 +42,8 @@ def freqFilter(wordList, low, high):
     count =  collections.Counter(wordList)
     totalCount = sum(count.values())
     return [word for word in wordList if float(count[word])/totalCount >= low and float(count[word])/totalCount < high]
+
+
 
 # This will modify a lexicon to get an effective frequency
 def toEffectiveFrequency(lex, threshold):
@@ -230,47 +233,29 @@ def toSentences(s):
 def getWikiSentences(title):
     return toSentences(wikipedia.page(title).content.lower())
 
-# Given two article, return a word spectrum. Input must be a Counter.
-def getWordUniqueness(article1, article2, smooth=1, returntype=collections.Counter):
-    result = returntype()
-    for w in article1:
-        result[w] = 1
-    for w in article2:
-        result[w] = 1
-    for w in result:
-        result[w] = math.log(float(article1[w] + smooth) / float(article2[w] + smooth))
-    return result
-
-#####################################################################################
-# Compare two article and rank other words in the article onto a spectrum
-# This functions is pretty magical. Can be very useful ! ! !
-
-def getWikiUniqueness(title1, title2, smooth=1, returntype=collections.Counter):
-    return getWordUniqueness(getWordCountWiki(title1), getWordCountWiki(title2), smooth, returntype)
-
-def getWikiCompareSpectrum(title1, title2, smooth=1, returntype=collections.Counter):
-    maxi, mini = float('-inf'), float('inf')
-    result = getWikiUniqueness(title1, title2, smooth, returntype)
-    for words in result:
-        maxi = max(maxi, result[words])
-        mini = min(mini, result[words])
-    for words in result:
-        result[words] = 2 * float(result[words] - mini) / (maxi - mini) - 1
-    return result
-
 #####################################################################################
 # Given a list of words and a desired length, return a list of which words are resampled according
 # to the original probability distribution.
 def resample(wordList, size):
     return [random.choice(wordList) for i in range(size)]
 
+def updatedResample(wordList, size):
+    count = collections.Counter(wordList)
+    total = sum(count.value())
+    to_return = []
+    for word in count:
+        iteration = math.floor(count[word]/float(total)*size)
+        for i in range(iteration):
+            to_return.append(word)
+    return to_return
+    
 #####################################################################################
 
 def k_means(article_name):
     model = gs.models.Word2Vec.load('gensimModel')
     page = getCleanWikiContent(article_name)
-    text = freqFilter(removeMeaningless(page.lower().split(' ')), 0.001, 1)
-    resampledText = resample(text, 200)
+    text = freqFilter(removeMeaningless(page.lower().split(' ')), 0.003, 1)
+    resampledText = resample(text, 60)
     countText = collections.Counter(resampledText)
     vecs = [model[word] for word in resampledText if word in model.vocab]
 
