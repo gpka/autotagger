@@ -47,6 +47,7 @@ def normalizedCompare(title1, title2, smooth=1, returntype=collections.Counter):
     return result
 
 # OddOneOut model
+<<<<<<< HEAD
 def oddOneOut(article1, article2, article3):
     raise Exception("Not implemented")
 
@@ -90,3 +91,5 @@ def getRelativeCount(title, listOfTitle, factor=1, threshold=0, weight=1, smooth
     result = compareArticleWithBase(title, listOfTitle, weight, smooth, returntype)
     expofilter(result, factor, threshold)
     return result
+
+# def oddOneOut(article1, article2, article3):
