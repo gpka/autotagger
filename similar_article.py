@@ -8,33 +8,25 @@ import random
 import util
 import numpy as np
 
+def cosine(c1, c2):
+	return np.dot(c1, c2)/(np.linalg.norm(c1) * np.linalg.norm(c2))
 
-# Input: 
-# kmean = (centroids, weight) 
-# where centroids = array of numpy 
-# and weight = list of number
-# Output:
-# sum of closest distance for each cluster
 def one_way_similar(kmeans1, kmeans2):
 	centroids1, weight1 = kmeans1[0], kmeans1[1]
-	centroids2 = kmeans2[0]
+	centroids2, weight2 = kmeans2[0], kmeans2[1]
 	dist_list = []
-	for index, centroid1 in enumerate(centroids1):
-		dist_list.append(max(weight1[index]/(np.linalg.norm(centroid1 - centroid2) + 1) for centroid2 in centroids2))
-
+	for index1, centroid1 in enumerate(centroids1):
+		if weight1[index1] == 0 or np.linalg.norm(centroid1) == 0: continue
+		dist_list.append(max(weight1[index1]*cosine(centroid1, centroid2) \
+						for index2, centroid2 in enumerate(centroids2) if weight2[index2] != 0 and np.linalg.norm(centroid2)))
 	return sum(dist_list)
 
 def similar(kmeans1, kmeans2):
 	return np.array([one_way_similar(kmeans1, kmeans2), one_way_similar(kmeans2, kmeans1)])
 
-def average_similar(kmeans1, kmeans2, iteration):
-	return sum(similar(kmeans1, kmeans2) for i in range(iteration))/iteration
-
-text_1 = 'Microsoft'
-text_2 = 'Google'
-iterate = 10
-kmean_1 = util.k_means(text_1)
-kmean_2 = util.k_means(text_2)
-print text_1,',', text_2, iterate
-print average_similar(kmean_1, kmean_2, iterate)
-
+while 1:
+	title1 = raw_input('Insert the first title:')
+	title2 = raw_input('Insert the second title:')
+	if len(title1) == 0 or len(title2) == 0: break
+	result = similar(util.k_means(title1), util.k_means(title2))
+	print "Similarity between two articles is (%f, %f)" % (result[0], result[1])

@@ -327,5 +327,6 @@ def k_means(article_name):
             s = s/float(len(centroid))
         weights[index] = s
     toReturn_centroids = [centroids[i] for i in range(num_centroids) if weights[i] > 0]
-    toReturn_weights = [weight[i] for i in range(num_centroids) if weights[i] > 0]
+    toReturn_weights = [weights[i] for i in range(num_centroids) if weights[i] > 0]
+
     return(toReturn_centroids, toReturn_weights)
