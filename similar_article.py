@@ -18,7 +18,7 @@ def one_way_similar(kmeans1, kmeans2):
 	for index1, centroid1 in enumerate(centroids1):
 		if weight1[index1] == 0 or np.linalg.norm(centroid1) == 0: continue
 		dist_list.append(max(weight1[index1]*cosine(centroid1, centroid2) \
-						for index2, centroid2 in enumerate(centroids2) if weight2[index2] != 0 and np.linalg.norm(centroid2)))
+						for index2, centroid2 in enumerate(centroids2) if weight2[index2] != 0 and np.linalg.norm(centroid2) != 0))
 	return sum(dist_list)
 
 def similar(kmeans1, kmeans2):

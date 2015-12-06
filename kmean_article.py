@@ -6,12 +6,14 @@ import string
 import random
 import util
 import numpy as np
+from spectrum import getRelativeCount
 
 model = gs.models.Word2Vec.load('gensimModel')
 
 listOfPageName = ['Sushi', 'Burrito', 'Thailand', 'google', 'Muslim', 'Islam', 'Pizza', 'South Korea', 'Andrew Ng', 'Barack Obama', 'Google']
 pages = [util.getCleanWikiContent(names) for names in listOfPageName]
-texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.002, 1) for page in pages]
+texts = [util.freqFilter(util.removeMeaningless(page.lower().split(' ')), 0.003, 1) for page in pages]
+# texts = [getRelativeCount(name, listOfPageName, 4, 0.35) for name in listOfPageName]
 # texts = [util.removeMeaningless(page.lower().split(' ')) for page in pages]
 # print texts
 # texts = util.truncatedList(texts, 0.5, 1)
@@ -25,8 +27,8 @@ countTexts = [collections.Counter(text) for text in resampledTexts]
 # print collections.Counter(resampledTexts[0])
 
 # text0 = list(set(resampledTexts[2]))
-text0 = resampledTexts[3]
-countText0 = countTexts[3]
+text0 = resampledTexts[2]
+countText0 = countTexts[2]
 text0_invocab = [word for word in text0 if word in model.vocab]
 vecs = [model[word] for word in text0 if word in model.vocab]
 

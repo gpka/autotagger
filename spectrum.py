@@ -1,6 +1,6 @@
 import math, collections
 import wikipedia
-from util import getWordCountWiki
+import util
 
 # Given two article, return a word spectrum. Input must be a Counter.
 def getPairUniqueness(article1, article2, smooth=1, returntype=collections.Counter):
@@ -32,7 +32,7 @@ def getLogPairUniqueness(article1, article2, smooth=1, returntype=collections.Co
 # This functions is pretty magical. Can be very useful ! ! !
 
 def getWikiPairUniqueness(title1, title2, smooth=1, returntype=collections.Counter):
-    return getLogPairUniqueness(getWordCountWiki(title1), getWordCountWiki(title2), smooth, returntype)
+    return getLogPairUniqueness(util.getWordCountWiki(title1), util.getWordCountWiki(title2), smooth, returntype)
 
 def normalizedCompare(title1, title2, smooth=1, returntype=collections.Counter):
     if title1==title2:
@@ -47,7 +47,6 @@ def normalizedCompare(title1, title2, smooth=1, returntype=collections.Counter):
     return result
 
 # OddOneOut model
-<<<<<<< HEAD
 def oddOneOut(article1, article2, article3):
     raise Exception("Not implemented")
 
@@ -66,7 +65,7 @@ def getLogUniqueness(article, smooth=1, returntype=collections.Counter):
 
 # !!!!!! Danger !!!!!! Not usable with >1 word long title
 def normalizedLogUniqueness(title, smooth=1, returntype=collections.Counter):
-    return getLogUnisonUniqueness(getWordCountWiki(title), title.lower(), smooth, returntype)
+    return getLogUnisonUniqueness(util.getWordCountWiki(title), title.lower(), smooth, returntype)
 
 def compareArticleWithBase(title, listOfTitle, weight=1, smooth=1, returntype=collections.Counter):
     result = returntype()

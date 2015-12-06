@@ -5,7 +5,7 @@ import wikipedia
 import string
 import random
 import numpy as np
-import spectrum
+from spectrum import getRelativeCount as grc
 
 def getPage(title):
     return wikipedia.page(title)
@@ -239,8 +239,8 @@ def getWikiSentences(title):
 def resample(wordList, size):
     return [random.choice(wordList) for i in range(size)]
 
-def updatedResample(wordList, size):
-    count = collections.Counter(wordList)
+def updatedResample(text, size):
+    count = collections.Counter(text)
     total = sum(count.values())
     to_return = []
     for word in count:
@@ -252,22 +252,27 @@ def updatedResample(wordList, size):
 #####################################################################################
 
 def k_means(article_name):
+
+    # KB = ["Cosmology", "Psychology", "University", "Car", "Book", "Basil", "Elephant"]
+    # filteredCounter = grc(article_name, KB, 4, 0.35)
+
     model = gs.models.Word2Vec.load('gensimModel')
     page = getCleanWikiContent(article_name)
     text = freqFilter(removeMeaningless(page.lower().split(' ')), 0.003, 1)
-    resampledText = resample(text, 60)
+
+    resampledText = updatedResample(text, 100)
     countText = collections.Counter(resampledText)
     vecs = [model[word] for word in resampledText if word in model.vocab]
-
     text0 = resampledText
     countText0 = countText
     text0_invocab = [word for word in text0 if word in model.vocab]
 
     #K-means
-    num_iter = 10
+    num_iter = 50
     num_centroids = 8
     min_cost = float('inf')
     final_assignments = [-1 for i in range(len(vecs))]
+    final_centroids = [np.array([0.0 for i in range(100)]) for j in range(num_centroids)]
     for i in range(num_iter):
 
         #initialize cost of objective Function
@@ -283,7 +288,7 @@ def k_means(article_name):
         while assignments != preassignments:
             cost = 0
             preassignments = assignments
-            cluster = [[]]*num_centroids
+            #cluster = [[] for i in range(num_centroids)]
 
             #assigning centroids to each vector
             for i, vec in enumerate(vecs):
@@ -296,7 +301,7 @@ def k_means(article_name):
                         norm = value
                 cost += norm
                 assignments[i] = assign
-                cluster[assign].append(vec)
+                #cluster[assign].append(vec)
 
             # recalculating the centroids
             mean_centroids = [np.array([0.0 for i in range(100)]) for j in range(num_centroids)]
@@ -311,6 +316,7 @@ def k_means(article_name):
 
         if cost < min_cost:
             final_assignments = assignments
+            final_centroids = centroids
             min_cost = cost
 
     cluster = [[] for i in range(num_centroids)]
@@ -320,13 +326,16 @@ def k_means(article_name):
 
     weights = [0 for i in range(num_centroids)]
     for index, centroid in enumerate(cluster):
+        # print "++++++", index, "+++++++"
         s = 0
         for word in centroid:
             s += countText0[word]
+            # print word
         if len(centroid) != 0:
             s = s/float(len(centroid))
         weights[index] = s
-    toReturn_centroids = [centroids[i] for i in range(num_centroids) if weights[i] > 0]
+        # print s
+    toReturn_centroids = [final_centroids[i] for i in range(num_centroids) if weights[i] > 0]
     toReturn_weights = [weights[i] for i in range(num_centroids) if weights[i] > 0]
 
     return(toReturn_centroids, toReturn_weights)
