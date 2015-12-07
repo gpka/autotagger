@@ -1,6 +1,6 @@
 import math, collections
 import wikipedia
-import util
+from util import getWordCountWiki, dot
 
 # Given two article, return a word spectrum. Input must be a Counter.
 def getPairUniqueness(article1, article2, smooth=1, returntype=collections.Counter):
@@ -32,7 +32,7 @@ def getLogPairUniqueness(article1, article2, smooth=1, returntype=collections.Co
 # This functions is pretty magical. Can be very useful ! ! !
 
 def getWikiPairUniqueness(title1, title2, smooth=1, returntype=collections.Counter):
-    return getLogPairUniqueness(util.getWordCountWiki(title1), util.getWordCountWiki(title2), smooth, returntype)
+    return getLogPairUniqueness(getWordCountWiki(title1), getWordCountWiki(title2), smooth, returntype)
 
 def normalizedCompare(title1, title2, smooth=1, returntype=collections.Counter):
     if title1==title2:
@@ -45,11 +45,6 @@ def normalizedCompare(title1, title2, smooth=1, returntype=collections.Counter):
     for words in result:
         result[words] = 2 * float(result[words] - mini) / (maxi - mini) - 1
     return result
-
-# OddOneOut model
-def oddOneOut(article1, article2, article3):
-    raise Exception("Not implemented")
-
 
 def getRelativeLogUniqueness(article, key, smooth=1, returntype=collections.Counter):
     result = returntype()
@@ -65,7 +60,7 @@ def getLogUniqueness(article, smooth=1, returntype=collections.Counter):
 
 # !!!!!! Danger !!!!!! Not usable with >1 word long title
 def normalizedLogUniqueness(title, smooth=1, returntype=collections.Counter):
-    return getLogUnisonUniqueness(util.getWordCountWiki(title), title.lower(), smooth, returntype)
+    return getLogUnisonUniqueness(getWordCountWiki(title), title.lower(), smooth, returntype)
 
 def compareArticleWithBase(title, listOfTitle, weight=1, smooth=1, returntype=collections.Counter):
     result = returntype()
@@ -86,9 +81,43 @@ def expofilter(count, factor, threshold=0):
         else:
             count[w] = math.exp(factor * count[w])
 
+def linfilter(count, threshold=0):
+    wordlist = list(count)
+    for w in wordlist:
+        if count[w] < threshold:
+            del count[w]
+
 def getRelativeCount(title, listOfTitle, factor=1, threshold=0, weight=1, smooth=1, returntype=collections.Counter):
     result = compareArticleWithBase(title, listOfTitle, weight, smooth, returntype)
     expofilter(result, factor, threshold)
     return result
 
-# def oddOneOut(article1, article2, article3):
+
+################################################################################
+def oddOneOut1(title1, title2, title3, factor=1, threshold=0, weight=1, smooth=1, returntype=collections.Counter):
+    namelist = [title1, title2, title3]
+    cmp1 = getRelativeCount(namelist[0], namelist, factor, threshold, weight, smooth, returntype)
+    cmp2 = getRelativeCount(namelist[1], namelist, factor, threshold, weight, smooth, returntype)
+    cmp3 = getRelativeCount(namelist[2], namelist, factor, threshold, weight, smooth, returntype)
+    common12 = dot(cmp1,cmp2)
+    common13 = dot(cmp1,cmp3)
+    common23 = dot(cmp2,cmp3)
+    print title1, "has odd factor of", common23
+    print title2, "has odd factor of", common13
+    print title3, "has odd factor of", common12
+
+# perform dot analysis, but pre filter
+def getOddity2(namelist, threshold=0):
+    cmp12 = normalizedCompare(namelist[1], namelist[0])
+    cmp13 = normalizedCompare(namelist[2], namelist[0])
+    linfilter(cmp12, threshold)
+    linfilter(cmp13, threshold)
+    # print cmp12
+    # print cmp13
+    return dot(cmp12, cmp13)
+
+def oddOneOut2(namelist, threshold=0):
+    result = []
+    for i in range(3):
+        result.append(getOddity2([namelist[i], namelist[(i+1)%3], namelist[(i+2)%3]], threshold))
+    return result.index(max(result))
