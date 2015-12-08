@@ -1,0 +1,43 @@
+#!/usr/local/bin/python
+
+import dtree as dt
+from oddity import oddityDot
+print
+print "==================== Demo ===================="
+print
+print "This is a simple article categorizer demo."
+print "We will test our categorizer on Wikipedia articles!"
+print "You will enter list of article names (with each name followed by return key)."
+print "Press return again when you are done."
+print
+namelist = []
+while 1:
+    p = str(raw_input("Enter name of article #%d: " % (len(namelist) + 1) ))
+    if p == "": break
+    namelist.append(p)
+maxi = len(namelist)*(len(namelist)-1)*(len(namelist)-2)/6
+print
+print "This will create %d lines of data. It might take longer to process > 2000 lines of data." % maxi
+print
+numdata = str(raw_input("Enter reduced number of data (or nothing for full data). Press return to proceed: "))
+
+od = oddityDot()
+print "Retrieving %d articles ... This may take a while." % len(namelist)
+for i in range(len(namelist)):
+    od.addArticle(namelist[i])
+
+print "Making data set ... ~%d tokens expected" % (int(numdata) if numdata != "" else maxi)
+if numdata == "" or int(numdata) >= maxi:
+    dataset = od.getFullTrainingSet()
+else:
+    dataset = od.getPartialTrainingSet(int(numdata))
+
+print "Start solving ..."
+category = dt.DichotomousTree(namelist, dataset)
+category.treeSolve()
+print category.listform()
+print "Finished solving. Calculating accuracy..."
+total = 0
+for x in dataset:
+    total += x[2]
+print "Approximately %d/%d of conditions satisfied." % (category.reward * len(dataset)/total, len(dataset))
